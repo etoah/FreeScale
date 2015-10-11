@@ -1,0 +1,11 @@
+OPEN data 0 0 25 100
+Data < attributes SCOPE global,COMPLEMENT None,FORMAT Symb,MODE periodical,SORT NotSort,UPDATERATE 1,NAMEWIDTH 16
+OPEN Visualizationtool 23 1 86 100
+VisualizationTool< Attributes [swRefresh="1",refTime="1"]
+VisualizationTool< LoadInstrument Chart[BoundX="12",BoundY="51",BoundH="542",BoundW="982",Port_PortKind="6",Port="0x2175",Port_PortSize="1",RangeHigh="40",RangeLow="-40",colLine="1,16206345"]
+VisualizationTool< LoadInstrument Chart[BoundX="12",BoundY="50",BoundH="542",BoundW="982",colBkgnd="T13158600",Port_PortKind="6",Port="0x2167",Port_PortSize="1",RangeHigh="40",RangeLow="-40"]
+VisualizationTool< ResetVT Undo
+bckcolor 50331647
+font 'Courier New' 9 BLACK
+AUTOSIZE on
+ACTIVATE "VisualizationTool" "Data"
