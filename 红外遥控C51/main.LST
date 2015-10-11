@@ -1,0 +1,279 @@
+C51 COMPILER V8.08   MAIN                                                                  07/11/2011 15:29:22 PAGE 1   
+
+
+C51 COMPILER V8.08, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\Program Files\KEIL\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /************************************************
+   2                  实现功能：外解码遥控程序
+   3                  硬件：STC89C52单片机，12MHZ晶振，红外接收管，车体及相关驱动
+   4                  作者：Duan
+   5                  日期：2011年7月10日 01:05:23
+   6                  备注：用常见家用电视遥控器即可控制
+   7          ************************************************/
+   8          #include <REG52.H>
+   9          sbit rightmotor2=P0^0;
+  10          sbit rightmotor1=P0^1;
+  11          sbit leftmotor1=P0^2;
+  12          sbit leftmotor2=P0^3;
+  13          sbit ena=P2^4;
+  14          sbit enb=P2^5;
+  15          
+  16          sbit IR_IO=P3^2;  
+  17          
+  18          unsigned char ucIRTime;
+  19          unsigned char ucCodeContent[4];
+  20          unsigned char ucAllBits[32];
+  21          void driver(unsigned  char flag)  ;
+  22          bit bIRFlag;
+  23          
+  24          
+  25          void Timer0Init(void);
+  26          void EXT0Init(void);
+  27          void IR_DataProcess(void);
+  28          
+  29          /******************************************************************************
+  30          函数名称：main
+  31          函数功能：主函数 
+  32          
+  33          *******************************************************************************/
+  34          void main()
+  35          {
+  36   1              EXT0Init();
+  37   1              Timer0Init();
+  38   1      
+  39   1              while(1)
+  40   1              {
+  41   2                      if(bIRFlag)
+  42   2                      {
+  43   3                              IR_DataProcess();
+  44   3                              bIRFlag=0;      
+  45   3                      }
+  46   2      
+  47   2                      driver(ucCodeContent[2]);
+  48   2      
+  49   2              }
+  50   1      
+  51   1      }
+  52          /******************************************************************************
+  53          函数名称：Timer0_IR
+  54          函数功能：中断函数入口
+  55          入口参数：无
+C51 COMPILER V8.08   MAIN                                                                  07/11/2011 15:29:22 PAGE 2   
+
+  56          返回值：无
+  57          备注：无
+  58          *******************************************************************************/
+  59          void Timer0_IR() interrupt 1            //定时器0，用来测量脉冲的宽度
+  60          {
+  61   1              ucIRTime++;
+  62   1      }
+  63          /******************************************************************************
+  64          函数名称：EXT0_IR
+  65          函数功能：外部中断函数
+  66          
+  67          *******************************************************************************/
+  68          void EXT0_IR() interrupt 0//外部中断1，用来处理接收信号
+  69          {
+  70   1              static unsigned char i;
+  71   1              static bit bFlag;//判断是否开始第一位
+  72   1      
+  73   1              if(bFlag)
+  74   1              {
+  75   2                      if(ucIRTime<38&&ucIRTime>=29)   //TC9012的头码，即引导码
+  76   2                              i=0;
+  77   2                      ucAllBits[i]=ucIRTime; //一次性读取存储32位电平宽度
+  78   2                      ucIRTime=0;
+  79   2                      i++;
+  80   2                      if(i==33)
+  81   2                      {
+  82   3                              bIRFlag=1;
+  83   3                              i=0;
+  84   3                      }
+  85   2              }
+  86   1              else
+  87   1              {
+  88   2                      ucIRTime=0;
+  89   2                      bFlag=1;//是否是第一次接收
+  90   2              }
+  91   1      }
+  92          /******************************************************************************
+  93          函数名称：Timer0Init
+  94          函数功能：定时器0初始化函数
+  95          
+  96          *******************************************************************************/
+  97          void Timer0Init(void)   //定时器0初始化
+  98          {
+  99   1              TMOD=0x02;//定时器工作方式2，TH0是重装值，TL0是初值
+ 100   1              TH0=0x00;
+ 101   1              TL0=0x00;
+ 102   1              ET0=1;
+ 103   1              TR0=1;
+ 104   1      
+ 105   1      }
+ 106          
+ 107          /******************************************************************************
+ 108          函数名称：EXT0Init
+ 109          函数功能：外部中断初始化函数
+ 110          
+ 111          *******************************************************************************/
+ 112          void EXT0Init(void)       //外部中断0的初始化
+ 113          {
+ 114   1              IT0=1;
+ 115   1              EX0=1;
+ 116   1              EA=1;
+ 117   1      
+C51 COMPILER V8.08   MAIN                                                                  07/11/2011 15:29:22 PAGE 3   
+
+ 118   1      }
+ 119          /******************************************************************************
+ 120          函数名称：IR_DataProcess
+ 121          函数功能：红外数据处理函数
+ 122          
+ 123          *******************************************************************************/
+ 124          
+ 125          void IR_DataProcess(void)//红外码值处理函数
+ 126          {
+ 127   1              unsigned char i,j,k;
+ 128   1              unsigned char ucCode,ucUserValue;
+ 129   1              k=1;
+ 130   1              for(i=0;i<4;i++)
+ 131   1              {
+ 132   2                      for(j=1;j<=8;j++)
+ 133   2                      {
+ 134   3                              ucCode=ucAllBits[k];
+ 135   3                              if(ucCode>5)
+ 136   3                              {
+ 137   4                                      ucUserValue=ucUserValue|0x80;
+ 138   4                              }
+ 139   3                              else
+ 140   3                              {
+ 141   4                                      ucUserValue=ucUserValue;
+ 142   4                              }
+ 143   3                              if(j<8)
+ 144   3                              {
+ 145   4                                      ucUserValue=ucUserValue>>1;     
+ 146   4                              }
+ 147   3                              k++;
+ 148   3                      }
+ 149   2                      ucCodeContent[i]=ucUserValue;
+ 150   2                      ucUserValue=0;
+ 151   2              }
+ 152   1      }
+ 153          
+ 154          
+ 155          
+ 156          /******************************************************************************
+ 157          函数名称：Delay
+ 158          函数功能：延时函数
+ 159          入口参数：uiCount-延时参数，每加1增加0.5ms
+ 160          *******************************************************************************/
+ 161          void Delay(unsigned int uiCount)
+ 162          {
+ 163   1              unsigned char j = 244;
+ 164   1              for(;uiCount > 0;uiCount--) while(--j); 
+ 165   1      }
+ 166          /******************************************************************************
+ 167          函数名称：driver
+ 168          函数功能:电动机驱动
+ 169          *******************************************************************************/
+ 170          
+ 171          
+ 172          
+ 173          void driver(unsigned  char flag)
+ 174          {
+ 175   1              ena=enb=1;
+ 176   1              switch (flag)
+ 177   1              {
+ 178   2              
+ 179   2                      case  4:                  //左直转
+C51 COMPILER V8.08   MAIN                                                                  07/11/2011 15:29:22 PAGE 4   
+
+ 180   2                                      {
+ 181   3                                      leftmotor1=0;
+ 182   3                                      rightmotor1=0;
+ 183   3                                      leftmotor2=1;
+ 184   3                                      rightmotor2=0;  
+ 185   3                                      break   ;
+ 186   3                                      }
+ 187   2                      case 1 :
+ 188   2                                      {
+ 189   3                                      leftmotor1=0;
+ 190   3                                      rightmotor1=0;
+ 191   3                                      leftmotor2=1;
+ 192   3                                      rightmotor2=0;
+ 193   3                                      Delay(2);
+ 194   3                                      rightmotor2=1;
+ 195   3                                      Delay(2);
+ 196   3                                      break   ;
+ 197   3      
+ 198   3                                              
+ 199   3                                      }
+ 200   2                      case 6:
+ 201   2                                      {
+ 202   3                              leftmotor1=0;
+ 203   3                               rightmotor1=0;
+ 204   3                               leftmotor2=0;
+ 205   3                              rightmotor2=1;
+ 206   3                                      break   ;
+ 207   3                                      }
+ 208   2                      case 3:
+ 209   2                                      {
+ 210   3                                      leftmotor1=0;
+ 211   3                                      rightmotor1=0;
+ 212   3                                      rightmotor2=1;
+ 213   3                                      leftmotor2=0;
+ 214   3                                      Delay(2)  ;
+ 215   3                                      leftmotor2=1;
+ 216   3                                      Delay(2);
+ 217   3                                      break   ;
+ 218   3                                      }
+ 219   2                      case 2:
+ 220   2                                      {
+ 221   3                                              leftmotor1=0;
+ 222   3                                              rightmotor1=0;
+ 223   3                                              leftmotor2=1;
+ 224   3                                              rightmotor2=1;
+ 225   3                                              break   ;
+ 226   3                                      }
+ 227   2                      case 8:
+ 228   2                                      {
+ 229   3                                              leftmotor1=1;
+ 230   3                                              rightmotor1=1;
+ 231   3                                              leftmotor2=0;
+ 232   3                                               rightmotor2=0;
+ 233   3                                              break   ;
+ 234   3                                      }
+ 235   2                      case 5:
+ 236   2                                      {
+ 237   3                              leftmotor1=0;
+ 238   3                               rightmotor1=0;
+ 239   3                               leftmotor2=0;
+ 240   3                               rightmotor2=0;
+ 241   3      
+C51 COMPILER V8.08   MAIN                                                                  07/11/2011 15:29:22 PAGE 5   
+
+ 242   3                      } 
+ 243   2              }
+ 244   1      }
+ 245          
+ 246          /****************end of line3**********************/
+ 247          /****************end of line2**********************/
+ 248          /****************end of line1**********************/
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    313    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     38    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

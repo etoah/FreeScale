@@ -1,0 +1,27 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: main - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "F:\360data\重要数据\用户临~1\RSP934D.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/main.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\Microcontroller code\红外接收··\4\main.c"
+]
+Creating command line "cl.exe @"F:\360data\重要数据\用户临~1\RSP934D.tmp"" 
+<h3>Output Window</h3>
+Compiling...
+main.c
+d:\microcontroller code\红外接收··\4\main.c(8) : fatal error C1083: Cannot open include file: 'REG52.H': No such file or directory
+执行 cl.exe 时出错.
+
+
+
+<h3>Results</h3>
+main.obj - 1 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
