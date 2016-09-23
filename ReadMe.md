@@ -8,7 +8,6 @@
 [视频](http://v.youku.com/v_show/id_XNDE4MTc2ODY0.html)：http://v.youku.com/v_show/id_XNDE4MTc2ODY0.html
 
 
-##回忆
 
 ###飞思卡尔直立小车
 
