@@ -24,9 +24,6 @@ http://v.youku.com/v_show/id_XOTQ2MTY3MTAw.html
 http://v.youku.com/v_show/id_XMjg0MTc2MDAw.html
 
 
-###团队
-
-![团队](https://raw.githubusercontent.com/etoah/FreeScale/master/Doc/FreescaleTeam.jpg)
 
 
 
